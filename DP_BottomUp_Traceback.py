@@ -1,5 +1,8 @@
+# Read in the input file from command line
 for i in range(3):
     file_input = input()
+    
+    #Assign variables to respected values
     if i == 0:
         first_line = file_input.split()
         num_tasks = int(first_line[0])+1
@@ -8,14 +11,24 @@ for i in range(3):
         point_vals = file_input.split()
     elif i == 2:
         effort_hours = file_input.split()
+
+#initialize empty 2D array of tuples (the first value is the value of the cell, the second value is the type of cell 
+# for traceback implmentation) as the DP table
 DP = [[(0,  "empty") for i in range(desired_points)] for j in range(num_tasks)]
 
+#Function for Bottom-Up DP
 def grade_bottom_up(DP, num_tasks, desired_points, point_vals, effort_hours): 
+
+    #Base case: if i == 0 and j > 0 then DP[i][j] = infinity, "B" is for the traceback step indicating base case
     DP[0][1:] = [(float("inf"), "B")] * (desired_points -1)
+
+    #Nested for loops to iterate through every cell in the DP table 
     for i in range(1, num_tasks):
         for j in range(1, desired_points):
             if j >= int(point_vals[i-1]): 
-                if DP[i-1][j][0] <= DP[i-1][j - int(point_vals[i-1])][0] + int(effort_hours[i-1]):
+
+                #Take the minimum of 
+                if DP[i-1][j][0] <= DP[i-1][max(0, j - int(point_vals[i-1]))][0] + int(effort_hours[i-1]):
                     DP[i][j] = (DP[i-1][j][0], "D")
                 else:
                     DP[i][j] = (DP[i-1][max(0, j - int(point_vals[i-1]))][0] + int(effort_hours[i-1]), "SK")             
