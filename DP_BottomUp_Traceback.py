@@ -27,48 +27,78 @@ def grade_bottom_up(DP, num_tasks, desired_points, point_vals, effort_hours):
         for j in range(1, desired_points):
             if j >= int(point_vals[i-1]): 
 
-                #Take the minimum of 
+                #Take the minimum of discarding the current task and selecting and continuing 
                 if DP[i-1][j][0] <= DP[i-1][max(0, j - int(point_vals[i-1]))][0] + int(effort_hours[i-1]):
+
+                    #Discarding the task
                     DP[i][j] = (DP[i-1][j][0], "D")
                 else:
+
+                    #Selecting the current task and continuing
                     DP[i][j] = (DP[i-1][max(0, j - int(point_vals[i-1]))][0] + int(effort_hours[i-1]), "SK")             
             else:
+
+                #Take the minimum of discrading the current task or selecting the current task and ending
                 if DP[i-1][j][0] <= int(effort_hours[i-1]):
+
+                    #Discarding
                     DP[i][j] = (DP[i-1][j][0], "D")
                 else:
+
+                    #Selecting and ending
                     DP[i][j] = (int(effort_hours[i-1]), "SE")
     return DP
 
+#Function for traceback
 def trace_back(DP, num_tasks, desired_points):
+
+    #Declaring variables
     num_selected = 0
     selected_tasks = []
     curr_row = num_tasks-1
     curr_col = desired_points-1
+
+    #While loop to prevent negative indexing and stop when a base case is found
     while curr_row > 0 and curr_col > 0:
         decision = DP[curr_row][curr_col][1]
+
+        #If the task was selected, add the task number to array of selected tasks, and set the new row to be that of the next task
         if decision == "SK":
             num_selected += 1
             selected_tasks.append(curr_row)
             curr_col -= int(point_vals[curr_row -1])
+        
+        #If the task was discarded proceed to next task 
         elif decision == "D":
             curr_row -= 1
+        
+        #If the task was selected, add the task number to array of selected tasks, and set the new row to be that of the next task
         elif decision == "SE":
             num_selected += 1
             selected_tasks.append(curr_row)
             curr_col -= int(point_vals[curr_row -1])
     return num_selected, selected_tasks
-    
+
+#Get the DP table
 DP = grade_bottom_up(DP, num_tasks, desired_points, point_vals, effort_hours)
+
+#Get the number of selected tasks, and which taks where selected
 num_selected, selected_tasks = trace_back(DP, num_tasks, desired_points)
 
+#If the desired points was not possible to acheive with the tasks given return -1
 if DP[num_tasks-1][desired_points-1][0] == float("inf"):
    print(-1)
+
+#Otherwise print the value of the cell requested and the number of selected tasks
 else:
-    num_selected, selected_tasks = trace_back(DP, num_tasks, desired_points)
     print(DP[num_tasks-1][desired_points-1][0])
     print(num_selected)
+
+    #If no tasks were selected print zero
     if not selected_tasks:
         print(0)
+
+    #Otherwise print the selected tasks in lexographic ordering
     else:
         print(*selected_tasks[::-1])
 
